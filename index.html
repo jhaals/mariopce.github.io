@@ -1,1 +1,181 @@
-Hello World
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>TomTom Android Maps SDK</title>
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../elements/codelab.html">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <style is="custom-style">
+    body {
+      font-family: "Roboto",sans-serif;
+      background: var(--google-codelab-background, --paper-grey-300);
+    }
+  </style>
+  
+</head>
+<body unresolved class="fullbleed">
+
+  <google-codelab title="TomTom Android Maps SDK"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Introduction" duration="5">
+          <h3>TomTom Services and SDK</h3>
+  Maps SDK for Android is a convenient Software Development Kit that helps you developers make the most out of the TomTom Online Services in your mobile application, without the complexity of bare REST API calls. Optimized for Android applications, the Maps SDK for Android allows you to easily configure and deploy different location services inside of your Android application.  Maps SDK for Android comes as modules so that you can use just the features you need:  <ol start="1">
+<li>Online Maps – display and interact with beautiful maps in your application using vector tiles, raster tiles, visualize traffic incidents and/or traffic flow on top of a map</li>
+<li>Online Search – search for an address, for a Point of Interest or a combination of both. Includes auto-completion and correction for the best user experience</li>
+<li>Online Routing – use the industry’s leading routing engine to calculate routes with advanced parameters such as traffic avoidance, eco routes, waypoint optimization, reachable range, time to leave, etc.</li>
+</ol>
+  Maps SDK for Android comes with the documentation and examples for the key features of map, search and routing as well as real code samples in Maps SDK Examples app. Use this source code in your own app to speed up development and get to market faster!   <aside class="special">TomTom services: 2500 requests/per day are free</aside>
+   <h3>What you’ll need</h3>
+  <ol start="1">
+<li>Android Studio</li>
+<li>JDK - Java Developer Kid</li>
+</ol>
+  
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Getting Started" duration="10">
+          <h3>Get your api key from developer.tomtom.com</h3>
+  Go to developer.tomtom.com and register. Log in and go to your dashboard.  <img src="img/adcec7720c6a66a6.png">  Press add a new App, choose a name and select product which you will use  <img src="img/f8fbf2330c1298fb.png">  <h3>Request an evaluation API key to access the underlying services</h3>
+  On your dashboard is a new app, please select the app to expand product and check key. The most important is Customer API Key ( 2500 request/per day are for free) This key is needed for sdk please copy this key to clipboard because it is needed in next steps.  Now you are ready to create a new application and display a map.   <aside class="special">If you forgot your key, you can sign in again to developer.tomtom.com and get a key from dashboard</aside>
+   
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create new application" duration="15">
+          <h3>Android studio</h3>
+  Run android studio and start new project  <img src="img/f609c99855be605e.png">  Create new android project — kotlin support  <h3>Empty activity — with default names for layout and activity</h3>
+  <img src="img/2e8f65b8f37dbc5d.png">  add to root/build.gradle a maven tomtom repository.  <pre><code language="gradle" class="gradle">maven {
+    url &#39;https://maven.tomtom.com:8443/nexus/content/repositories/releases/&#39;
+}
+</code></pre>
+  <h3>In AndroidManifest.xml add your key OnlineMaps.Key:</h3>
+  <img src="img/f572d336bc94714b.png">  <h3>Dependency to app/build.gradle</h3>
+  <pre><code language="gradle" class="gradle">implementation(&#34;com.tomtom.online:sdk-maps:2.+@aar&#34;){
+    transitive = true;
+}
+</code></pre>
+  Log a message when the element is removed. Remove it by typing <code>$(&#39;my-element&#39;).remove()</code> in your console.  <h3>Multidex</h3>
+  in android section please enable multidex ( it is simple when minSDKVersion is 21 or higher) <em>multiDexEnabled true</em>  <pre><code language="gradle" class="gradle">android {
+    defaultConfig {
+        ...
+        minSdkVersion 21
+        targetSdkVersion 26
+        multiDexEnabled true
+    }
+    ...
+}
+</code></pre>
+   <aside class="warning">When you use minSdkVersion lower then 21 then check link below</aside>
+   <a href="https://developer.android.com/studio/build/multidex.html" target="_blank">multidex support</a>  
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Display map" duration="15">
+          <h3>layout</h3>
+  Add a map to layout <code>main_layout.xml</code>:  <pre><code language="xml" class="xml">&lt;com.tomtom.online.sdk.map.MapView
+    android:id=&#34;@+id/map_view&#34;
+    android:layout_width=&#34;match_parent&#34;
+    android:layout_height=&#34;match_parent&#34;
+    app:layout_constraintBottom_toBottomOf=&#34;parent&#34;
+    app:layout_constraintEnd_toEndOf=&#34;parent&#34;
+    app:layout_constraintStart_toStartOf=&#34;parent&#34;
+    app:layout_constraintTop_toTopOf=&#34;parent&#34;&gt;
+
+&lt;/com.tomtom.online.sdk.map.MapView&gt;
+</code></pre>
+  <h3>pass lifecycle events to mapview</h3>
+  <pre><code language="kotlin" class="kotlin">class MainActivity : AppCompatActivity() {
+    lateinit var mapView: MapView
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        mapView = findViewById&lt;MapView&gt;(R.id.map_view);
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        mapView.onPause()
+        super.onPause()
+
+    }
+}
+</code></pre>
+  
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Map manipulation" duration="10">
+          <h3>Center map on Amsterdam</h3>
+  You need register on map ready callback, and then all operation you should make on tomtomMap object.  <pre><code language="kotlin" class="kotlin">mapView = findViewById&lt;MapView&gt;(R.id.map_view);
+mapView.addOnMapReadyCallback { tomtomMap -&gt;
+    val amsterdam = LatLng(52.36,4.88)
+    val zoomLevel = 12
+    tomtomMap.centerOn(amsterdam, zoomLevel)
+}
+</code></pre>
+  <h3>Add marker</h3>
+  Adding marker is similar, register OnMapReadyCallback and when map is ready you can add a marker.  <pre><code language="kotlin" class="kotlin">mapView = findViewById&lt;MapView&gt;(R.id.map_view);
+mapView.addOnMapReadyCallback { tomtomMap -&gt;
+    val amsterdam = LatLng(52.36,4.88)
+    tomtomMap.addMarker(MarkerBuilder(amsterdam))
+}
+</code></pre>
+  
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Enable logs" duration="3">
+          Enable timber.  <pre><code language="kotlin" class="kotlin">override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        //enable logs
+        Timber.plant(Timber.DebugTree())
+</code></pre>
+ 
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-49880327-14', 'auto');
+
+    (function() {
+      var gaCodelab = '';
+      if (gaCodelab) {
+        ga('create', gaCodelab, 'auto', {name: 'codelab'});
+      }
+
+      var gaView;
+      var parts = location.search.substring(1).split('&');
+      for (var i = 0; i < parts.length; i++) {
+        var param = parts[i].split('=');
+        if (param[0] === 'viewga') {
+          gaView = param[1];
+          break;
+        }
+      }
+      if (gaView && gaView !== gaCodelab) {
+        ga('create', gaView, 'auto', {name: 'view'});
+      }
+    })();
+  </script>
+
+</body>
+</html>
